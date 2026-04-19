@@ -1,0 +1,1366 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>叶珏成的小宇宙</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+        
+        #intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #0a0a2a, #000);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 1;
+            transition: opacity 2s ease-in-out;
+        }
+        
+        #intro-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .intro-text {
+            font-size: 2.5rem;
+            text-align: center;
+            margin: 20px;
+            opacity: 0;
+            text-shadow: 0 0 10px #4d79ff, 0 0 20px #4d79ff;
+            color: #e0e7ff;
+            max-width: 80%;
+            line-height: 1.6;
+            animation: glow 3s infinite alternate;
+            transition: opacity 0.8s ease-in-out;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #4d79ff, 0 0 20px #4d79ff; }
+            to { text-shadow: 0 0 15px #6d8fff, 0 0 30px #6d8fff; }
+        }
+        
+        .quote {
+            font-style: italic;
+            font-size: 1.8rem;
+            margin-top: 40px;
+            color: #aabfff;
+            animation: fadePulse 4s infinite;
+        }
+        
+        @keyframes fadePulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        
+        .author {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            color: #8899cc;
+        }
+        
+        #galaxy-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        #galaxy-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .control-btn {
+            background: rgba(30, 30, 70, 0.7);
+            border: 1px solid #4d79ff;
+            color: #e0e7ff;
+            padding: 12px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn:hover {
+            background: rgba(60, 60, 120, 0.9);
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px #4d79ff;
+        }
+        
+        #registration-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 30, 0.95);
+            border: 1px solid #4d79ff;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            z-index: 50;
+            display: none;
+            box-shadow: 0 0 30px rgba(77, 121, 255, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        
+        #registration-panel.visible {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -45%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+        
+        .panel-title {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: #aabfff;
+            text-shadow: 0 0 10px #4d79ff;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #8899cc;
+            font-size: 1.1rem;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid #4d79ff;
+            border-radius: 8px;
+            color: #e0e7ff;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #6d8fff;
+            box-shadow: 0 0 10px rgba(109, 143, 255, 0.5);
+        }
+        
+        input[type="file"] {
+            padding: 10px;
+            cursor: pointer;
+        }
+        
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #4d79ff, #6a5af9);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        button[type="submit"]:hover {
+            background: linear-gradient(135deg, #5d89ff, #7a6af9);
+            box-shadow: 0 0 20px rgba(77, 121, 255, 0.7);
+            transform: translateY(-2px);
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #aabfff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-btn:hover {
+            background: rgba(77, 121, 255, 0.2);
+            transform: rotate(90deg);
+        }
+        
+        #star-detail {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(10, 10, 30, 0.9);
+            border: 1px solid #4d79ff;
+            border-radius: 12px;
+            padding: 20px;
+            width: 320px;
+            z-index: 40;
+            display: none;
+            box-shadow: 0 0 30px rgba(77, 121, 255, 0.4);
+            backdrop-filter: blur(10px);
+        }
+        
+        #star-detail.visible {
+            display: block;
+            animation: slideInRight 0.5s;
+        }
+        
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .star-name {
+            font-size: 1.6rem;
+            color: #aabfff;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            text-shadow: 0 0 10px #4d79ff;
+        }
+        
+        .star-info {
+            margin-bottom: 10px;
+            color: #8899cc;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .star-info span {
+            color: #e0e7ff;
+            text-align: right;
+        }
+        
+        #stars-count {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(30, 30, 70, 0.7);
+            border: 1px solid #4d79ff;
+            border-radius: 30px;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        #stars-count::before {
+            content: "✦";
+            font-size: 1.3rem;
+            color: #aabfff;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #4d79ff;
+        }
+        
+        .tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            color: #8899cc;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            color: #aabfff;
+        }
+        
+        .tab.active {
+            color: #aabfff;
+            border-bottom: 3px solid #4d79ff;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        #stars-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            border-radius: 10px;
+            background: rgba(20, 20, 40, 0.3);
+            padding: 10px;
+        }
+        
+        .star-item {
+            padding: 15px;
+            border-bottom: 1px solid rgba(77, 121, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 8px;
+        }
+        
+        .star-item:hover {
+            background: rgba(77, 121, 255, 0.15);
+            transform: translateX(5px);
+        }
+        
+        #share-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 30, 0.95);
+            border: 1px solid #4d79ff;
+            border-radius: 15px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            z-index: 50;
+            display: none;
+            box-shadow: 0 0 30px rgba(77, 121, 255, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        
+        #share-panel.visible {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .share-title {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #aabfff;
+            text-shadow: 0 0 10px #4d79ff;
+        }
+        
+        .share-desc {
+            text-align: center;
+            color: #8899cc;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        #download-json-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #4d79ff, #6a5af9);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        #download-json-btn:hover {
+            background: linear-gradient(135deg, #5d89ff, #7a6af9);
+            box-shadow: 0 0 20px rgba(77, 121, 255, 0.7);
+            transform: translateY(-2px);
+        }
+        
+        #close-share {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #aabfff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        #close-share:hover {
+            background: rgba(77, 121, 255, 0.2);
+            transform: rotate(90deg);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 10, 30, 0.95);
+            border: 1px solid #4d79ff;
+            border-radius: 30px;
+            padding: 15px 35px;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: fadeInOut 3s;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .notification::before {
+            content: "✓";
+            font-size: 1.5rem;
+            color: #6bffb8;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; top: 10px; }
+            10% { opacity: 1; top: 20px; }
+            90% { opacity: 1; top: 20px; }
+            100% { opacity: 0; top: 10px; }
+        }
+        
+        #remote-stars-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 30, 0.95);
+            border: 1px solid #4d79ff;
+            border-radius: 15px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            z-index: 50;
+            display: none;
+            box-shadow: 0 0 30px rgba(77, 121, 255, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        
+        #remote-stars-panel.visible {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .remote-stars-title {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #aabfff;
+            text-shadow: 0 0 10px #4d79ff;
+        }
+        
+        .remote-stars-desc {
+            text-align: center;
+            color: #8899cc;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        #remote-stars-file {
+            width: 100%;
+            padding: 12px;
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid #4d79ff;
+            border-radius: 8px;
+            color: #e0e7ff;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+        
+        #load-remote-btn-inside {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #4d79ff, #6a5af9);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        #load-remote-btn-inside:hover {
+            background: linear-gradient(135deg, #5d89ff, #7a6af9);
+            box-shadow: 0 0 20px rgba(77, 121, 255, 0.7);
+            transform: translateY(-2px);
+        }
+        
+        .hint-text {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #8899cc;
+            font-size: 0.9rem;
+            z-index: 5;
+            opacity: 0.7;
+        }
+        
+        @media (max-width: 768px) {
+            .intro-text {
+                font-size: 1.8rem;
+            }
+            
+            .quote {
+                font-size: 1.4rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+                bottom: 10px;
+                width: 90%;
+            }
+            
+            .control-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            #star-detail {
+                width: calc(100% - 40px);
+                left: 20px;
+                top: 20px;
+                right: auto;
+            }
+            
+            #share-panel, #remote-stars-panel {
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 90%;
+                max-width: 90%;
+            }
+            
+            .hint-text {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 启动画面 -->
+    <div id="intro-screen">
+        <div class="intro-text">叶珏成的小宇宙</div>
+        <div class="intro-text">“他要送给程心一颗星星”</div>
+        <div class="intro-text">“哦，还有一个惊喜：你的那颗星星是他送的”</div>
+        <div class="intro-text">——《三体》</div>
+        <div class="intro-text">刘慈欣</div>
+    </div>
+    
+    <!-- 星系容器 -->
+    <div id="galaxy-container">
+        <canvas id="galaxy-canvas"></canvas>
+        
+        <!-- 星星数量显示 -->
+        <div id="stars-count">星系中的星星：<span id="stars-count-value">0</span></div>
+        
+        <!-- 星星详情 -->
+        <div id="star-detail">
+            <div class="star-name" id="detail-name">未命名恒星</div>
+            <div class="star-info">拥有者：<span id="detail-owner">未知</span></div>
+            <div class="star-info">星座：<span id="detail-constellation">未分类</span></div>
+            <div class="star-info">恒星质量等级：<span id="detail-mass">I</span></div>
+            <div class="star-info">ID：<span id="detail-id">#00000</span></div>
+            <div class="star-info">坐标：<span id="detail-coords">(0.00, 0.00)</span></div>
+            <div class="star-info">注册时间：<span id="detail-date">2023-01-01</span></div>
+        </div>
+        
+        <!-- 控制按钮 -->
+        <div class="controls">
+            <button class="control-btn" id="register-btn">✨ 注册你的星星</button>
+            <button class="control-btn" id="stars-list-btn">⭐ 查看所有星星</button>
+            <button class="control-btn" id="share-btn">🔗 导出星星数据(JSON)</button>
+            <button class="control-btn" id="load-remote-btn">🌌 加载外部星星数据</button>
+            <button class="control-btn" id="reset-view">🔄 重置视角</button>
+        </div>
+        
+        <div class="hint-text">🖱️ 拖拽旋转视角 | 滚轮缩放 | 点击星星查看详情</div>
+    </div>
+    
+    <!-- 注册面板 -->
+    <div id="registration-panel">
+        <button class="close-btn" id="close-register">&times;</button>
+        <div class="panel-title">注册属于你的恒星</div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="register">注册恒星</div>
+            <div class="tab" data-tab="list">所有恒星</div>
+        </div>
+        
+        <div class="tab-content active" id="register-tab">
+            <form id="star-registration-form">
+                <div class="form-group">
+                    <label for="star-name">恒星名称</label>
+                    <input type="text" id="star-name" required placeholder="为你的恒星命名">
+                </div>
+                
+                <div class="form-group">
+                    <label for="owner-name">你的名字</label>
+                    <input type="text" id="owner-name" required placeholder="恒星拥有者">
+                </div>
+                
+                <div class="form-group">
+                    <label for="constellation">所属星座</label>
+                    <select id="constellation" required>
+                        <option value="">选择星座</option>
+                        <option value="天鹰座">天鹰座</option>
+                        <option value="半人马座">半人马座</option>
+                        <option value="天琴座">天琴座</option>
+                        <option value="猎户座">猎户座</option>
+                        <option value="大熊座">大熊座</option>
+                        <option value="小熊座">小熊座</option>
+                        <option value="仙女座">仙女座</option>
+                        <option value="飞马座">飞马座</option>
+                        <option value="麒麟座">麒麟座</option>
+                        <option value="凤凰座">凤凰座</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mass">恒星质量等级</label>
+                    <select id="mass" required>
+                        <option value="">选择质量等级</option>
+                        <option value="I">I (超巨星)</option>
+                        <option value="II">II (亮巨星)</option>
+                        <option value="III">III (巨星)</option>
+                        <option value="IV">IV (次巨星)</option>
+                        <option value="V">V (主序星)</option>
+                        <option value="VI">VI (矮星)</option>
+                    </select>
+                </div>
+                
+                <button type="submit">在星海中点亮你的恒星</button>
+            </form>
+        </div>
+        
+        <div class="tab-content" id="list-tab">
+            <div id="stars-list">
+                <!-- 星星列表会在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 分享面板 -->
+    <div id="share-panel">
+        <button id="close-share">&times;</button>
+        <div class="share-title">导出星星数据</div>
+        <div class="share-desc">
+            点击下方按钮，将你的星系所有星星数据导出为JSON文件。<br>
+            你可以分享这个文件给朋友，他们可以加载你的星星数据。
+        </div>
+        <button id="download-json-btn">下载 galaxy-stars.json</button>
+    </div>
+    
+    <!-- 加载他人星系面板 -->
+    <div id="remote-stars-panel">
+        <button id="close-remote">&times;</button>
+        <div class="remote-stars-title">加载外部星星数据</div>
+        <div class="remote-stars-desc">
+            选择他人分享的星星数据JSON文件，加载到你的星系中
+        </div>
+        <input type="file" id="remote-stars-file" accept=".json">
+        <button id="load-remote-btn-inside">加载星星数据</button>
+    </div>
+    
+    <!-- 通知 -->
+    <div class="notification" id="notification">
+        <span id="notification-text">操作成功！</span>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://esm.sh/three@0.174.0",
+            "three/addons/": "https://esm.sh/three@0.174.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        
+        // 星座颜色映射
+        const constellationColors = {
+            '天鹰座': '#4d79ff',
+            '半人马座': '#ff6b6b',
+            '天琴座': '#6bffb8',
+            '猎户座': '#ffb84d',
+            '大熊座': '#d46bff',
+            '小熊座': '#6bd4ff',
+            '仙女座': '#ff6bd4',
+            '飞马座': '#b8ff6b',
+            '麒麟座': '#ffd46b',
+            '凤凰座': '#6bffd4',
+            '半人马座': '#ff8e6b'
+        };
+        
+        // 初始星星数据
+        const initialStars = [
+            {
+                id: 'STAR-001',
+                name: '程心之星',
+                owner: '程心',
+                constellation: '天琴座',
+                mass: 'I',
+                x: 50,
+                y: -30,
+                date: '2023-07-15'
+            },
+            {
+                id: 'STAR-002',
+                name: '三体星系',
+                owner: '刘慈欣',
+                constellation: '半人马座',
+                mass: 'III',
+                x: -80,
+                y: 40,
+                date: '2023-07-16'
+            },
+            {
+                id: 'STAR-003',
+                name: '黑暗森林',
+                owner: '罗辑',
+                constellation: '猎户座',
+                mass: 'II',
+                x: 20,
+                y: 70,
+                date: '2023-07-17'
+            },
+            {
+                id: 'STAR-004',
+                name: '蓝色空间',
+                owner: '章北海',
+                constellation: '飞马座',
+                mass: 'IV',
+                x: -40,
+                y: -60,
+                date: '2023-07-18'
+            },
+            {
+                id: 'STAR-005',
+                name: '万有引力',
+                owner: '关一帆',
+                constellation: '仙女座',
+                mass: 'V',
+                x: 90,
+                y: 10,
+                date: '2023-07-19'
+            }
+        ];
+        
+        // 全局变量
+        let stars = [];
+        let remoteStars = [];
+        let customStarsPoints = [];
+        let customStarsColors = [];
+        let customStarsSizes = [];
+        let customStarsData = [];
+        let galaxyPoints;
+        let raycaster, mouse;
+        let camera, scene, renderer, controls;
+        let clock;
+        
+        // DOM 加载完成后执行
+        document.addEventListener('DOMContentLoaded', async function() {
+            const canvas = document.getElementById('galaxy-canvas');
+            const introScreen = document.getElementById('intro-screen');
+            const registerBtn = document.getElementById('register-btn');
+            const starsListBtn = document.getElementById('stars-list-btn');
+            const registrationPanel = document.getElementById('registration-panel');
+            const closeRegisterBtn = document.getElementById('close-register');
+            const starForm = document.getElementById('star-registration-form');
+            const starsCount = document.getElementById('stars-count-value');
+            const resetViewBtn = document.getElementById('reset-view');
+            const tabs = document.querySelectorAll('.tab');
+            const starDetail = document.getElementById('star-detail');
+            const starsList = document.getElementById('stars-list');
+            const shareBtn = document.getElementById('share-btn');
+            const sharePanel = document.getElementById('share-panel');
+            const downloadJsonBtn = document.getElementById('download-json-btn');
+            const closeShareBtn = document.getElementById('close-share');
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            const loadRemoteBtn = document.getElementById('load-remote-btn');
+            const remoteStarsPanel = document.getElementById('remote-stars-panel');
+            const remoteStarsFile = document.getElementById('remote-stars-file');
+            const loadRemoteBtnInside = document.getElementById('load-remote-btn-inside');
+            const closeRemoteBtn = document.getElementById('close-remote');
+            
+            const introTexts = document.querySelectorAll('.intro-text');
+            introTexts.forEach((text, index) => {
+                setTimeout(() => {
+                    text.style.opacity = 1;
+                }, index * 1000);
+            });
+            
+            // 加载星星数据
+            function loadStarsData() {
+                // 从localStorage加载本地星星
+                const savedStars = localStorage.getItem('localStars');
+                let localStars = savedStars ? JSON.parse(savedStars) : initialStars;
+                
+                return localStars;
+            }
+            
+            // 保存本地星星到localStorage
+            function saveLocalStars() {
+                localStorage.setItem('localStars', JSON.stringify(stars));
+            }
+            
+            // 导出星星数据为JSON文件
+            function exportStarsToJson() {
+                try {
+                    const jsonStr = JSON.stringify(stars, null, 2);
+                    const blob = new Blob([jsonStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'galaxy-stars.json';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    showNotification('星星数据已成功导出为JSON文件！');
+                    sharePanel.classList.remove('visible');
+                } catch (e) {
+                    console.error('导出失败', e);
+                    showNotification('导出失败，请重试');
+                }
+            }
+            
+            // 加载JSON文件中的星星数据
+            function loadStarsFromJson(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const loadedStars = JSON.parse(e.target.result);
+                            resolve(loadedStars);
+                        } catch (err) {
+                            reject(err);
+                        }
+                    };
+                    reader.onerror = reject;
+                    reader.readAsText(file);
+                });
+            }
+            
+            // 显示通知
+            function showNotification(message) {
+                notificationText.textContent = message;
+                notification.style.display = 'flex';
+                
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            }
+            
+            // 初始化星星数据
+            stars = loadStarsData();
+            starsCount.textContent = stars.length;
+            
+            // 初始化Three.js场景
+            function initThreeJS() {
+                // 场景
+                scene = new THREE.Scene();
+                
+                // 相机
+                camera = new THREE.PerspectiveCamera(
+                    60,
+                    window.innerWidth / window.innerHeight,
+                    0.1,
+                    2000
+                );
+                camera.position.set(0, 20, 80);
+                
+                // 渲染器
+                renderer = new THREE.WebGLRenderer({ 
+                    canvas: canvas,
+                    antialias: true 
+                });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setClearColor(0x000000);
+                
+                // 控制器
+                controls = new OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+                controls.enablePan = false;
+                controls.minDistance = 10;
+                controls.maxDistance = 200;
+                
+                // 射线拾取
+                raycaster = new THREE.Raycaster();
+                mouse = new THREE.Vector2();
+                
+                // 时钟
+                clock = new THREE.Clock();
+                
+                // 窗口大小调整
+                window.addEventListener('resize', onWindowResize);
+                
+                // 点击事件
+                canvas.addEventListener('click', onCanvasClick);
+            }
+            
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+            
+            // 创建星系
+            function createGalaxy() {
+                const pointsArr = [];
+                const colors = [];
+                const sizes = [];
+                
+                // 核球粒子
+                const bulgeCount = 15000;
+                for (let i = 0; i < bulgeCount; i++) {
+                    const radius = Math.pow(Math.random(), 3) * 12;
+                    const point = new THREE.Vector3().randomDirection().multiplyScalar(radius);
+                    pointsArr.push(point);
+                    
+                    // 核球颜色：黄白色到橙红色渐变，模拟老年恒星
+                    const t = Math.random();
+                    colors.push(1.0 - t * 0.2, 0.9 - t * 0.3, 0.7 - t * 0.4);
+                    sizes.push(Math.random() * 0.8 + 0.2);
+                }
+                
+                // 旋臂粒子
+                const armCount = 180000;
+                const arms = 4;
+                const armSpread = 0.25;
+                const maxRadius = 100;
+                
+                for (let i = 0; i < armCount; i++) {
+                    const armIndex = Math.floor(Math.random() * arms);
+                    const angleOffset = (armIndex / arms) * Math.PI * 2;
+                    
+                    const theta = Math.random() * Math.PI * 8;
+                    const radius = Math.exp(theta * armSpread) * (maxRadius / Math.exp(Math.PI * 8 * armSpread));
+                    
+                    const radialJitter = (Math.random() - 0.5) * 5;
+                    const finalRadius = Math.min(radius + radialJitter, maxRadius);
+                    
+                    const angle = theta + angleOffset + (Math.random() - 0.5) * 0.4;
+                    const height = (Math.random() - 0.5) * 3;
+                    
+                    const x = Math.cos(angle) * finalRadius;
+                    const z = Math.sin(angle) * finalRadius;
+                    
+                    pointsArr.push(new THREE.Vector3(x, height, z));
+                    
+                    // 旋臂颜色：蓝白色到粉紫色渐变，模拟新生恒星和星云
+                    const t = Math.random();
+                    colors.push(0.6 + t * 0.2, 0.7 + t * 0.2, 0.9 + t * 0.1);
+                    sizes.push(Math.random() * 1.2 + 0.3);
+                }
+                
+                // 添加自定义星星（用户注册的星星）
+                customStarsPoints = [];
+                customStarsColors = [];
+                customStarsSizes = [];
+                customStarsData = [];
+                
+                stars.forEach(star => {
+                    // 将原来的2D坐标转换为3D坐标
+                    const x = star.x * 0.6;
+                    const z = star.y * 0.6;
+                    const y = (Math.random() - 0.5) * 2;
+                    
+                    const point = new THREE.Vector3(x, y, z);
+                    customStarsPoints.push(point);
+                    customStarsData.push({...star, position: point});
+                    
+                    // 解析星座颜色
+                    const colorHex = constellationColors[star.constellation] || '#ffffff';
+                    const color = new THREE.Color(colorHex);
+                    customStarsColors.push(color.r, color.g, color.b);
+                    
+                    // 根据质量等级设置星星大小
+                    const massSize = {
+                        'I': 8,
+                        'II': 6,
+                        'III': 5,
+                        'IV': 4,
+                        'V': 3,
+                        'VI': 2
+                    };
+                    customStarsSizes.push(massSize[star.mass] || 3);
+                });
+                
+                // 合并所有粒子
+                const allPoints = [...pointsArr, ...customStarsPoints];
+                const allColors = [...colors, ...customStarsColors];
+                const allSizes = [...sizes, ...customStarsSizes];
+                
+                // 创建BufferGeometry
+                const geometry = new THREE.BufferGeometry().setFromPoints(allPoints);
+                geometry.setAttribute('color', new THREE.Float32BufferAttribute(allColors, 3));
+                geometry.setAttribute('size', new THREE.Float32BufferAttribute(allSizes, 1));
+                
+                // 着色器材质
+                const material = new THREE.ShaderMaterial({
+                    uniforms: {
+                        uTime: { value: 0 }
+                    },
+                    vertexShader: `
+                        uniform float uTime;
+                        attribute vec3 color;
+                        attribute float size;
+                        varying vec3 vColor;
+                        
+                        void main() {
+                            vec3 pos = position;
+                            
+                            // 微弱脉动动画
+                            float pulse = sin(uTime * 0.3 + length(pos) * 0.1) * 0.15;
+                            pos += normalize(pos) * pulse;
+                            
+                            vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                            gl_Position = projectionMatrix * mvPosition;
+                            
+                            // 透视缩放
+                            gl_PointSize = size * (80.0 / -mvPosition.z);
+                            gl_PointSize = min(gl_PointSize, 150.0);
+                            
+                            vColor = color;
+                        }
+                    `,
+                    fragmentShader: `
+                        varying vec3 vColor;
+                        
+                        void main() {
+                            vec2 uv = gl_PointCoord - 0.5;
+                            float d = length(uv);
+                            
+                            if (d > 0.5) discard;
+                            
+                            // 抗锯齿边缘
+                            float alpha = 1.0 - smoothstep(0.35, 0.5, d);
+                            
+                            // 中心更亮
+                            float center = 1.0 - d * 2.0;
+                            vec3 finalColor = vColor * (0.8 + center * 0.4);
+                            
+                            gl_FragColor = vec4(finalColor, alpha);
+                        }
+                    `,
+                    transparent: true,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false
+                });
+                
+                // 创建粒子系统
+                galaxyPoints = new THREE.Points(geometry, material);
+                scene.add(galaxyPoints);
+            }
+            
+            // 动画循环
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                const t = clock.getElapsedTime();
+                if (galaxyPoints) {
+                    galaxyPoints.material.uniforms.uTime.value = t;
+                    galaxyPoints.rotation.y = t * 0.01;
+                }
+                
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            
+            // 画布点击事件
+            function onCanvasClick(event) {
+                // 计算鼠标在标准化设备坐标中的位置
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                // 更新射线
+                raycaster.setFromCamera(mouse, camera);
+                
+                // 检测与自定义星星的碰撞
+                const intersects = raycaster.intersectObject(galaxyPoints);
+                
+                if (intersects.length > 0) {
+                    const index = intersects[0].index;
+                    const backgroundCount = 195000; // 背景粒子总数
+                    
+                    // 如果点击的是自定义星星
+                    if (index >= backgroundCount) {
+                        const customIndex = index - backgroundCount;
+                        const star = customStarsData[customIndex];
+                        if (star) {
+                            showStarDetail(star);
+                        }
+                    } else {
+                        // 点击背景，隐藏详情
+                        starDetail.classList.remove('visible');
+                    }
+                }
+            }
+            
+            // 显示星星详情
+            function showStarDetail(star) {
+                document.getElementById('detail-name').textContent = star.name;
+                document.getElementById('detail-owner').textContent = star.owner;
+                document.getElementById('detail-constellation').textContent = star.constellation;
+                document.getElementById('detail-mass').textContent = star.mass;
+                document.getElementById('detail-id').textContent = star.id;
+                document.getElementById('detail-coords').textContent = `(${star.x.toFixed(2)}, ${star.y.toFixed(2)})`;
+                document.getElementById('detail-date').textContent = star.date;
+                
+                starDetail.classList.add('visible');
+            }
+            
+            // 重置视角
+            function resetView() {
+                camera.position.set(0, 20, 80);
+                controls.reset();
+                showNotification('视角已重置');
+            }
+            
+            // 更新星星列表
+            function updateStarsList() {
+                starsList.innerHTML = '';
+                stars.forEach(star => {
+                    const item = document.createElement('div');
+                    item.className = 'star-item';
+                    item.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: ${constellationColors[star.constellation]}">✦</span>
+                            <span style="font-weight: bold;">${star.name}</span>
+                            <span style="color: #8899cc;">${star.owner}</span>
+                        </div>
+                    `;
+                    item.addEventListener('click', () => {
+                        // 聚焦到该星星
+                        const starPos = customStarsData.find(s => s.id === star.id)?.position;
+                        if (starPos) {
+                            controls.target.copy(starPos);
+                            camera.position.set(starPos.x, starPos.y + 10, starPos.z + 20);
+                            showStarDetail(star);
+                            registrationPanel.classList.remove('visible');
+                        }
+                    });
+                    starsList.appendChild(item);
+                });
+            }
+            
+            // 初始化
+            initThreeJS();
+            createGalaxy();
+            animate();
+            
+            setTimeout(() => {
+                introScreen.classList.add('fade-out');
+                setTimeout(() => {
+                    introScreen.style.display = 'none';
+                }, 2000);
+            }, 7000);
+            
+            // 事件绑定
+            registerBtn.addEventListener('click', () => {
+                registrationPanel.classList.add('visible');
+                // 切换到注册标签
+                tabs.forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.querySelector('[data-tab="register"]').classList.add('active');
+                document.getElementById('register-tab').classList.add('active');
+            });
+            
+            starsListBtn.addEventListener('click', () => {
+                registrationPanel.classList.add('visible');
+                updateStarsList();
+                // 切换到列表标签
+                tabs.forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.querySelector('[data-tab="list"]').classList.add('active');
+                document.getElementById('list-tab').classList.add('active');
+            });
+            
+            closeRegisterBtn.addEventListener('click', () => {
+                registrationPanel.classList.remove('visible');
+            });
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+                    
+                    if (tab.dataset.tab === 'list') {
+                        updateStarsList();
+                    }
+                });
+            });
+            
+            resetViewBtn.addEventListener('click', resetView);
+            
+            // 星星注册表单
+            starForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const starName = document.getElementById('star-name').value;
+                const ownerName = document.getElementById('owner-name').value;
+                const constellation = document.getElementById('constellation').value;
+                const mass = document.getElementById('mass').value;
+                
+                // 生成随机位置（在星系范围内）
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * 80 + 20;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                
+                const newStar = {
+                    id: 'STAR-' + Date.now().toString(36).toUpperCase(),
+                    name: starName,
+                    owner: ownerName,
+                    constellation: constellation,
+                    mass: mass,
+                    x: x,
+                    y: y,
+                    date: new Date().toISOString().split('T')[0]
+                };
+                
+                stars.push(newStar);
+                saveLocalStars();
+                starsCount.textContent = stars.length;
+                
+                // 重新创建星系以添加新星星
+                scene.remove(galaxyPoints);
+                createGalaxy();
+                
+                showNotification(`恒星「${starName}」已成功点亮！`);
+                registrationPanel.classList.remove('visible');
+                starForm.reset();
+            });
+            
+            // 分享功能
+            shareBtn.addEventListener('click', () => {
+                sharePanel.classList.add('visible');
+            });
+            
+            closeShareBtn.addEventListener('click', () => {
+                sharePanel.classList.remove('visible');
+            });
+            
+            downloadJsonBtn.addEventListener('click', exportStarsToJson);
+            
+            // 加载远程星星
+            loadRemoteBtn.addEventListener('click', () => {
+                remoteStarsPanel.classList.add('visible');
+            });
+            
+            closeRemoteBtn.addEventListener('click', () => {
+                remoteStarsPanel.classList.remove('visible');
+            });
+            
+            loadRemoteBtnInside.addEventListener('click', async () => {
+                const file = remoteStarsFile.files[0];
+                if (!file) {
+                    showNotification('请先选择一个JSON文件');
+                    return;
+                }
+                
+                try {
+                    const loadedStars = await loadStarsFromJson(file);
+                    
+                    // 合并星星
+                    const localStarIds = new Set(stars.map(s => s.id));
+                    let addedCount = 0;
+                    
+                    loadedStars.forEach(star => {
+                        if (!localStarIds.has(star.id)) {
+                            stars.push(star);
+                            localStarIds.add(star.id);
+                            addedCount++;
+                        }
+                    });
+                    
+                    saveLocalStars();
+                    starsCount.textContent = stars.length;
+                    
+                    // 重新创建星系
+                    scene.remove(galaxyPoints);
+                    createGalaxy();
+                    
+                    showNotification(`成功加载了 ${addedCount} 颗新星星！`);
+                    remoteStarsPanel.classList.remove('visible');
+                    remoteStarsFile.value = '';
+                } catch (e) {
+                    console.error(e);
+                    showNotification('加载失败，请检查文件是否为有效的星星数据JSON');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
